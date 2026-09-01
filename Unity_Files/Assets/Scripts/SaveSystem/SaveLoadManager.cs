@@ -3,7 +3,8 @@ using System.IO;
 using UnityEngine;
 
 // SaveLoadManager.cs
-// Add to your player. F5 saves, F9 loads (rebind however you like). Uses
+// Add to your player. R saves, T loads (rebind however you like). F on a
+// CollectibleItem picks it up while in range - see CollectibleItem.cs. Uses
 // Application.persistentDataPath so it works the same in the editor and in a built player.
 public class SaveLoadManager : MonoBehaviour
 {
@@ -16,8 +17,8 @@ public class SaveLoadManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F5)) SaveGame();
-        if (Input.GetKeyDown(KeyCode.F9)) LoadGame();
+        if (Input.GetKeyDown(KeyCode.R)) SaveGame();
+        if (Input.GetKeyDown(KeyCode.T)) LoadGame();
     }
 
     public void RegisterCollected(string itemID)

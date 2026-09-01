@@ -4,6 +4,8 @@ using UnityEngine;
 // A world pickup with a stable, unique ID (set per-instance in the inspector). The save
 // system records which IDs have been collected so a reload can hide the right ones.
 // SETUP: give this GameObject a Collider with "Is Trigger" checked.
+// Standing in the trigger arms it - the player must then press F to actually pick it up
+// (not automatic on touch).
 public class CollectibleItem : MonoBehaviour
 {
     [Tooltip("MUST be unique per placed instance, e.g. \"Coin_01\", \"Coin_02\".")]
@@ -11,6 +13,9 @@ public class CollectibleItem : MonoBehaviour
 
     Renderer[] renderers;
     Collider col;
+
+    bool playerInRange;
+    SaveLoadManager pendingSaveComp;
 
     void Awake()
     {
@@ -23,14 +28,43 @@ public class CollectibleItem : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (playerInRange && Input.GetKeyDown(KeyCode.F))
+        {
+            Collect();
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
         SaveLoadManager saveComp = other.GetComponent<SaveLoadManager>();
         if (saveComp != null)
         {
-            saveComp.RegisterCollected(itemID);
-            SetCollectedSilently(true);
+            playerInRange = true;
+            pendingSaveComp = saveComp;
         }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        SaveLoadManager saveComp = other.GetComponent<SaveLoadManager>();
+        if (saveComp != null && saveComp == pendingSaveComp)
+        {
+            playerInRange = false;
+            pendingSaveComp = null;
+        }
+    }
+
+    void Collect()
+    {
+        if (pendingSaveComp != null)
+        {
+            pendingSaveComp.RegisterCollected(itemID);
+        }
+        SetCollectedSilently(true);
+        playerInRange = false;
+        pendingSaveComp = null;
     }
 
     // Called on pickup, and by the save system on load to instantly reflect a
