@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 // WeaponSwitcher.cs
 // Add to your player. Handles switching between trace-fire (hitscan), linear projectile,
@@ -20,6 +21,7 @@ public class WeaponSwitcher : MonoBehaviour
     [Header("Hitscan")]
     public float hitscanRange = 100f;
     public float hitscanDamage = 15f;
+    public LineRenderer tracerLine;
 
     [Header("Projectile Prefabs")]
     public ProjectileBase linearProjectilePrefab;
@@ -65,18 +67,24 @@ public class WeaponSwitcher : MonoBehaviour
     {
         Vector3 origin = aimCamera.transform.position;
         Vector3 dir = aimCamera.transform.forward;
+        Vector3 endPoint = origin + dir * hitscanRange;
 
         if (Physics.Raycast(origin, dir, out RaycastHit hit, hitscanRange))
         {
             hit.collider.GetComponent<IDamageable>()?.TakeDamage(hitscanDamage);
-            Debug.DrawLine(origin, hit.point, Color.yellow, 0.5f);
+            endPoint = hit.point;
         }
-        else
-        {
-            Debug.DrawLine(origin, origin + dir * hitscanRange, Color.yellow, 0.5f);
-        }
-        // TODO: replace Debug.DrawLine with a real tracer (LineRenderer flash or particle beam) -
-        // Debug.DrawLine only shows up in the Scene view / dev builds with gizmos, not a real player.
+
+        StartCoroutine(FlashTracer(muzzle.position, endPoint));
+    }
+
+    IEnumerator FlashTracer(Vector3 start, Vector3 end)
+    {
+        tracerLine.enabled = true;
+        tracerLine.SetPosition(0, start);
+        tracerLine.SetPosition(1, end);
+        yield return new WaitForSeconds(0.05f);
+        tracerLine.enabled = false;
     }
 
     void FireLinear()
