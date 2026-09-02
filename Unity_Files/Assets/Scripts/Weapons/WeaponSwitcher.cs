@@ -21,7 +21,6 @@ public class WeaponSwitcher : MonoBehaviour
     [Header("Hitscan")]
     public float hitscanRange = 100f;
     public float hitscanDamage = 15f;
-    public LineRenderer tracerLine;
 
     [Header("Projectile Prefabs")]
     public ProjectileBase linearProjectilePrefab;
@@ -38,6 +37,9 @@ public class WeaponSwitcher : MonoBehaviour
     public float lockOnRange = 60f;
     public float lockOnConeDegrees = 15f;
     public string lockOnTag = "AITarget"; // tag your WanderingAI (or any target) with this
+
+    [Header("Hitscan Tracer")]
+    public LineRenderer tracerLine;
 
     void Update()
     {
@@ -131,6 +133,21 @@ public class WeaponSwitcher : MonoBehaviour
         Projectile_Homing proj = Instantiate(homingProjectilePrefab, muzzle.position, aimCamera.transform.rotation);
         proj.owner = gameObject;
         proj.target = target;
+    }
+
+    // Reads the live damage value straight off the assigned prefab/field for each mode, so
+    // GameplayHUD's weapon list always matches whatever you've actually tuned in the
+    // inspector instead of a second hardcoded copy of the numbers.
+    public float GetWeaponDamage(WeaponMode mode)
+    {
+        switch (mode)
+        {
+            case WeaponMode.Hitscan: return hitscanDamage;
+            case WeaponMode.Linear: return linearProjectilePrefab ? linearProjectilePrefab.damage : 0f;
+            case WeaponMode.Arched: return archedProjectilePrefab ? archedProjectilePrefab.damage : 0f;
+            case WeaponMode.Homing: return homingProjectilePrefab ? homingProjectilePrefab.damage : 0f;
+            default: return 0f;
+        }
     }
 
     Transform FindLockOnTarget()

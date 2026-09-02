@@ -18,6 +18,13 @@ public class CollectibleItem : MonoBehaviour
     // silent state restore during Load - see SetCollectedSilently).
     public event System.Action<CollectibleItem> Collected;
 
+    // Static, fired by EVERY instance - lets GameplayHUD show "Press [F] to collect" without
+    // having to individually subscribe to (or poll) every collectible in the scene. Armed =
+    // player is standing in this item's trigger and it hasn't been picked up yet; Disarmed =
+    // player left range, or the item just got collected.
+    public static event System.Action<CollectibleItem> AnyArmed;
+    public static event System.Action<CollectibleItem> AnyDisarmed;
+
     Renderer[] renderers;
     Collider col;
 
@@ -45,6 +52,7 @@ public class CollectibleItem : MonoBehaviour
         {
             playerInRange = true;
             pendingSaveComp = saveComp;
+            if (!IsCollected) AnyArmed?.Invoke(this);
         }
     }
 
@@ -55,6 +63,19 @@ public class CollectibleItem : MonoBehaviour
         {
             playerInRange = false;
             pendingSaveComp = null;
+            AnyDisarmed?.Invoke(this);
+        }
+    }
+
+    // Safety net: if this item gets disabled/destroyed some other way while still armed (e.g.
+    // a fresh batch spawns and the old one goes away), make sure the HUD prompt doesn't get
+    // stuck on screen.
+    void OnDisable()
+    {
+        if (playerInRange)
+        {
+            playerInRange = false;
+            AnyDisarmed?.Invoke(this);
         }
     }
 
@@ -73,6 +94,7 @@ public class CollectibleItem : MonoBehaviour
         SetCollectedSilently(true);
         playerInRange = false;
         pendingSaveComp = null;
+        AnyDisarmed?.Invoke(this);
 
         Collected?.Invoke(this);
     }

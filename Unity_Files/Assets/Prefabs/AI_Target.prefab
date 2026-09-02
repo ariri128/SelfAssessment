@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 3911257112531481226}
   - component: {fileID: 4264436244301986865}
   - component: {fileID: 2214115531634688999}
-  - component: {fileID: -7007962315234144910}
+  - component: {fileID: -5113551179196931395}
   m_Layer: 0
   m_Name: AI_Target
   m_TagString: AITarget
@@ -194,7 +194,7 @@ CapsuleCollider:
   m_Height: 2.1585236
   m_Direction: 1
   m_Center: {x: -0.004290819, y: -0.004290819, z: 0}
---- !u!114 &-7007962315234144910
+--- !u!114 &-5113551179196931395
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

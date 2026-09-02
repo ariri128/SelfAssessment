@@ -49,6 +49,11 @@ public class WanderingAI : MonoBehaviour, IDamageable
     // (or anything else) react to this specific instance dying without polling every frame.
     public event System.Action<WanderingAI> Died;
 
+    // Static, fired alongside Died for every instance - lets GameplayHUD show a "Target
+    // Destroyed" message without having to subscribe to each WanderingAI individually (new
+    // ones keep spawning from AITargetSpawner over the course of a session).
+    public static event System.Action<WanderingAI> AnyTargetDestroyed;
+
     NavMeshAgent agent;
     Renderer visualRenderer;
     Color baseColor;
@@ -138,6 +143,7 @@ public class WanderingAI : MonoBehaviour, IDamageable
         if (health <= 0f)
         {
             Died?.Invoke(this);
+            AnyTargetDestroyed?.Invoke(this);
             Destroy(gameObject);
         }
     }

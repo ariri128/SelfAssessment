@@ -651,6 +651,7 @@ GameObject:
   m_Component:
   - component: {fileID: 489102980}
   - component: {fileID: 489102981}
+  - component: {fileID: 489102982}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -689,6 +690,20 @@ MonoBehaviour:
   objectivesText: "OBJECTIVES\n- Weapon switching (trace fire / linear\n   projectile
     / arched projectile)\n\n- Homing missile with lock-on tracking a\n   moving AI\n\n-
     Save & load (location, orientation,\n   progress, collectibles)"
+--- !u!114 &489102982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 489102979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4a328cc3e78540a4a2551593b31b3de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameplayHUD
+  weaponSwitcher: {fileID: 919400875}
+  targetDestroyedDisplayTime: 2
 --- !u!1 &514884149
 GameObject:
   m_ObjectHideFlags: 0
@@ -1230,7 +1245,6 @@ MonoBehaviour:
   currentMode: 0
   hitscanRange: 100
   hitscanDamage: 15
-  tracerLine: {fileID: 1351387752}
   linearProjectilePrefab: {fileID: 5361432873368964360, guid: 000c1ff593644474fba67a0500007d1d, type: 3}
   archedProjectilePrefab: {fileID: 1563172279298819172, guid: d0ef19166b8b14efc8bd265003959261, type: 3}
   homingProjectilePrefab: {fileID: 1356889373239746498, guid: 2dd623a9960f541a7af1df4acba1295e, type: 3}
@@ -1239,6 +1253,7 @@ MonoBehaviour:
   lockOnRange: 60
   lockOnConeDegrees: 15
   lockOnTag: AITarget
+  tracerLine: {fileID: 1351387752}
 --- !u!1 &1351387750
 GameObject:
   m_ObjectHideFlags: 0
