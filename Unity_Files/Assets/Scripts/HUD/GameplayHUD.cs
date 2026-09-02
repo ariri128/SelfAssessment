@@ -15,6 +15,9 @@ public class GameplayHUD : MonoBehaviour
     [Tooltip("How many seconds the 'Target Destroyed' message stays on screen after a kill.")]
     public float targetDestroyedDisplayTime = 2f;
 
+    [Header("UI Scaling")]
+    public float referenceScreenHeight = 1080f;
+
     static readonly (int key, WeaponMode mode, string label)[] WeaponEntries =
     {
         (1, WeaponMode.Hitscan, "Trace Fire"),
@@ -70,9 +73,19 @@ public class GameplayHUD : MonoBehaviour
     void OnGUI()
     {
         BuildStyles();
-        DrawWeaponPanel();
-        DrawCollectPrompt();
+
+        float uiScale = Screen.height / referenceScreenHeight;
+        float vw = Screen.width / uiScale;
+        float vh = Screen.height / uiScale;
+
+        Matrix4x4 originalMatrix = GUI.matrix;
+        GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(uiScale, uiScale, 1f));
+
+        DrawWeaponPanel(vw);
+        DrawCollectPrompt(vw, vh);
         DrawTargetDestroyed();
+
+        GUI.matrix = originalMatrix;
     }
 
     void BuildStyles()
@@ -81,7 +94,7 @@ public class GameplayHUD : MonoBehaviour
 
         weaponNameStyle = new GUIStyle(GUI.skin.label)
         {
-            fontSize = 13,
+            fontSize = 20,
             alignment = TextAnchor.UpperRight,
             fontStyle = FontStyle.Bold,
             wordWrap = false
@@ -93,7 +106,7 @@ public class GameplayHUD : MonoBehaviour
 
         promptStyle = new GUIStyle(GUI.skin.label)
         {
-            fontSize = 18,
+            fontSize = 26,
             alignment = TextAnchor.MiddleCenter,
             fontStyle = FontStyle.Bold
         };
@@ -104,7 +117,7 @@ public class GameplayHUD : MonoBehaviour
 
         targetDestroyedStyle = new GUIStyle(GUI.skin.label)
         {
-            fontSize = 24,
+            fontSize = 34,
             alignment = TextAnchor.UpperLeft,
             fontStyle = FontStyle.Bold
         };
@@ -114,15 +127,15 @@ public class GameplayHUD : MonoBehaviour
         targetDestroyedShadowStyle.normal.textColor = new Color(0f, 0f, 0f, 0.75f);
     }
 
-    void DrawWeaponPanel()
+    void DrawWeaponPanel(float vw)
     {
-        const float panelWidth = 260f;
-        const float lineHeight = 18f;
+        const float panelWidth = 340;
+        const float lineHeight = 26f;
         const float margin = 20f;
 
         WeaponMode? current = weaponSwitcher ? weaponSwitcher.currentMode : (WeaponMode?)null;
 
-        float x = Screen.width - panelWidth - margin;
+        float x = vw - panelWidth - margin;
         float y = margin;
 
         foreach (var entry in WeaponEntries)
@@ -141,15 +154,15 @@ public class GameplayHUD : MonoBehaviour
         }
     }
 
-    void DrawCollectPrompt()
+    void DrawCollectPrompt(float vw, float vh)
     {
         if (collectiblesInRange.Count == 0) return;
 
-        const float width = 420f;
-        const float height = 32f;
-        const float bottomMargin = 28f;
+        const float width = 480f;
+        const float height = 44f;
+        const float bottomMargin = 32f;
 
-        Rect rect = new Rect((Screen.width - width) / 2f, Screen.height - height - bottomMargin, width, height);
+        Rect rect = new Rect((vw - width) / 2f, vh - height - bottomMargin, width, height);
         Rect shadowRect = new Rect(rect.x + 2f, rect.y + 2f, rect.width, rect.height);
 
         GUI.Label(shadowRect, "Press [F] to collect", promptShadowStyle);
@@ -160,8 +173,8 @@ public class GameplayHUD : MonoBehaviour
     {
         if (targetDestroyedTimer <= 0f) return;
 
-        const float width = 320f;
-        const float height = 36f;
+        const float width = 380f;
+        const float height = 48f;
         const float margin = 20f;
 
         Rect rect = new Rect(margin, margin, width, height);
