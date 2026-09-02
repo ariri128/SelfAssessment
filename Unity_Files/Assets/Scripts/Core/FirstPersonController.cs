@@ -46,13 +46,20 @@ public class FirstPersonController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Cursor.lockState = Cursor.lockState == CursorLockMode.Locked
-                ? CursorLockMode.None
-                : CursorLockMode.Locked;
+            QuitGame();
         }
 
         HandleLook();
         HandleMove();
+    }
+
+    void QuitGame()
+    {
+#if UNITY_EDITOR
+    UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     void HandleLook()

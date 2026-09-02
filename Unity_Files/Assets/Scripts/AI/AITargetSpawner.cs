@@ -2,19 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-// AITargetSpawner.cs
-// Spawns WanderingAI targets in batches (default 2) at random points on the baked NavMesh,
-// spaced apart so they don't spawn on top of each other. Once every target in the current
-// batch has been destroyed (health hit 0), the next batch spawns. Mirrors CollectibleSpawner's
-// batch pattern, just driven by WanderingAI.Died instead of CollectibleItem.Collected.
-//
-// SETUP:
-//  1. Turn your existing AI_Target GameObject into a prefab (drag it from the Hierarchy into
-//     Assets/Prefabs), then delete the scene instance - this script spawns its own.
-//  2. Put this script on an empty GameObject in the scene (e.g. "AITargetSpawner").
-//  3. Assign aiTargetPrefab to that prefab, and drag your floor object into `floor`.
-//  4. Bake the NavMesh BEFORE pressing Play - spawn points are sampled from it, so an unbaked
-//     or stale NavMesh will make every spawn attempt fail and fall back to the floor center.
+/*
+   Spawns WanderingAI targets in batches of 2 at random points on the baked NavMesh
+   They are spaced apart so they don't spawn on top of each other
+   Once every target in the current batch has been destroyed (health hit 0), the next batch spawns
+*/
+
 public class AITargetSpawner : MonoBehaviour
 {
     public GameObject aiTargetPrefab;
@@ -90,14 +83,9 @@ public class AITargetSpawner : MonoBehaviour
         activeBatch.Add(ai);
     }
 
-    // Samples random points on the baked NavMesh (not just raw floor bounds) so every spawn is
-    // guaranteed walkable, and rejects candidates too close to another point already chosen for
-    // this batch so the two targets don't spawn stacked on top of each other.
     Vector3 RandomPointOnNavMesh()
     {
-        const float probeHeight = 0.5f; // arbitrary - just needs to be above the floor to sample down onto it
-        // Starts as the floor's own position so there's always a sane point to fall back to even
-        // if every attempt below misses the NavMesh entirely (e.g. it hasn't been baked yet).
+        const float probeHeight = 0.5f;
         Vector3 fallback = floor != null ? floor.position : transform.position;
 
         for (int attempt = 0; attempt < maxSpawnAttempts; attempt++)
@@ -119,8 +107,6 @@ public class AITargetSpawner : MonoBehaviour
             }
         }
 
-        // Every attempt either missed the NavMesh or landed too close to the batch-mate - spawn
-        // at the last valid point found anyway rather than skipping the spawn entirely.
         return fallback;
     }
 

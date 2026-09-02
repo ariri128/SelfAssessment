@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-// SaveLoadManager.cs
-// Add to your player. R saves, T loads (rebind however you like). F on a
-// CollectibleItem picks it up while in range - see CollectibleItem.cs. Uses
-// Application.persistentDataPath so it works the same in the editor and in a built player.
+/*
+   R saves, T loads
+   Uses Application.persistentDataPath so it works the same in the editor and in a built player
+*/
 public class SaveLoadManager : MonoBehaviour
 {
     [Tooltip("Wire this up to something meaningful for your demo - e.g. increment it whenever a collectible is grabbed.")]
@@ -26,7 +26,7 @@ public class SaveLoadManager : MonoBehaviour
         if (!string.IsNullOrEmpty(itemID))
         {
             collectedItems.Add(itemID);
-            progressValue = collectedItems.Count; // simplest possible "progress" - swap for your own if you want
+            progressValue = collectedItems.Count;
         }
     }
 
@@ -54,9 +54,6 @@ public class SaveLoadManager : MonoBehaviour
 
         SaveData data = JsonUtility.FromJson<SaveData>(File.ReadAllText(SavePath));
 
-        // If you're using a CharacterController for player movement, it fights direct transform
-        // writes - briefly disable it around the teleport. Harmless to leave this in even if
-        // you're using a Rigidbody instead.
         CharacterController cc = GetComponent<CharacterController>();
         if (cc) cc.enabled = false;
 

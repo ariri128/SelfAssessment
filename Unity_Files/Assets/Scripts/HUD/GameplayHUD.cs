@@ -1,26 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// GameplayHUD.cs
-// Runtime gameplay UI - separate from AssessmentHUD, which only handles the required P/O
-// toggles. Draws with OnGUI so it needs no Canvas/prefab setup, matching the rest of the
-// starter code's HUD approach. Three pieces, positioned so none of them can ever overlap:
-//
-//  - TOP-RIGHT (always visible): the weapon toggle list (1-4), tight-packed with no gap
-//    between entries. Whichever weapon is currently equipped gets a red "(equipped)" tag as
-//    an extra line right under its entry - that's the only entry that gets a second line.
-//  - BOTTOM-CENTER (only while relevant): "Press [F] to collect" - shown while the player is
-//    standing in a collectible's trigger radius and it hasn't been picked up yet. Disappears
-//    the instant they leave range or collect it.
-//  - TOP-LEFT (flashes briefly): "Target Destroyed" - shown for a couple seconds whenever a
-//    WanderingAI's health hits 0. Opposite corner from the weapon list (top-right) and
-//    opposite side from the collect prompt (bottom-center), so it can never overlap either.
-//
-// SETUP: put this on whichever object AssessmentHUD is on (Player or a GameManager object -
-// either works). `weaponSwitcher` auto-fills via GetComponent, falling back to a scene-wide
-// FindObjectOfType<WeaponSwitcher>() if it isn't on the same object - so it doesn't matter
-// whether this and WeaponSwitcher share a GameObject or not. You can also just drag the
-// Player object into the `weaponSwitcher` field by hand if you'd rather wire it explicitly.
+/*
+   Runtime gameplay UI added purely for visual assistance
+   Draws with OnGUI so it needs no Canvas/prefab setup, just like AssessmentHUD
+*/
 public class GameplayHUD : MonoBehaviour
 {
     [Header("References")]
@@ -31,8 +15,6 @@ public class GameplayHUD : MonoBehaviour
     [Tooltip("How many seconds the 'Target Destroyed' message stays on screen after a kill.")]
     public float targetDestroyedDisplayTime = 2f;
 
-    // (number key, weapon mode, display label) - drives both the panel text and which entry
-    // gets the red "(equipped)" tag. Numbers here match the 1/2/3/4 binds in WeaponSwitcher.Update.
     static readonly (int key, WeaponMode mode, string label)[] WeaponEntries =
     {
         (1, WeaponMode.Hitscan, "Trace Fire"),
@@ -53,9 +35,6 @@ public class GameplayHUD : MonoBehaviour
 
     void Awake()
     {
-        // Falls back to a scene-wide search if this isn't sitting on the same object as
-        // WeaponSwitcher (e.g. GameplayHUD lives on a GameManager object instead of the
-        // Player) - so it works either way without forcing a particular object layout.
         if (!weaponSwitcher) weaponSwitcher = GetComponent<WeaponSwitcher>();
         if (!weaponSwitcher) weaponSwitcher = FindObjectOfType<WeaponSwitcher>();
     }
@@ -86,8 +65,6 @@ public class GameplayHUD : MonoBehaviour
 
     void HandleCollectibleDisarmed(CollectibleItem item) => collectiblesInRange.Remove(item);
 
-    // Any WanderingAI dying (re)starts the display timer, so if targets die close together the
-    // message just stays up rather than flickering off and back on.
     void HandleTargetDestroyed(WanderingAI ai) => targetDestroyedTimer = targetDestroyedDisplayTime;
 
     void OnGUI()
@@ -100,8 +77,6 @@ public class GameplayHUD : MonoBehaviour
 
     void BuildStyles()
     {
-        // Styles are built lazily inside OnGUI because GUI.skin isn't valid until the first
-        // OnGUI call - same reasoning as AssessmentHUD.
         if (weaponNameStyle != null) return;
 
         weaponNameStyle = new GUIStyle(GUI.skin.label)
@@ -124,8 +99,6 @@ public class GameplayHUD : MonoBehaviour
         };
         promptStyle.normal.textColor = Color.white;
 
-        // Cheap drop-shadow (a second label offset by a couple px underneath) so the prompt
-        // and destroyed text stay readable over any background, not just dark ones.
         promptShadowStyle = new GUIStyle(promptStyle);
         promptShadowStyle.normal.textColor = new Color(0f, 0f, 0f, 0.75f);
 
@@ -160,8 +133,6 @@ public class GameplayHUD : MonoBehaviour
             GUI.Label(new Rect(x, y, panelWidth, lineHeight), line, weaponNameStyle);
             y += lineHeight;
 
-            // Only the currently-equipped entry gets the extra "(equipped)" line - every other
-            // entry just runs straight into the next one, no reserved blank gap.
             if (current.HasValue && entry.mode == current.Value)
             {
                 GUI.Label(new Rect(x, y, panelWidth, lineHeight), "(equipped)", equippedStyle);

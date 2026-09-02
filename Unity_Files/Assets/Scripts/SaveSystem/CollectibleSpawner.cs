@@ -1,19 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// CollectibleSpawner.cs
-// Spawns collectibles in batches of `batchSize` (default 3), picking randomly between
-// spherePrefab and cubePrefab for each one, at random points on `floor`. Once every
-// collectible in the current batch has actually been picked up (F), the next batch spawns.
-//
-// SETUP:
-//  1. Make two prefabs - a Sphere and a Cube - each with a trigger Collider and the
-//     CollectibleItem script on it (leave CollectibleItem's itemID field blank on the
-//     prefab; this script assigns a unique one to each spawned instance).
-//  2. Put this script on an empty GameObject in the scene (e.g. "CollectibleSpawner").
-//  3. Assign spherePrefab / cubePrefab, and drag your floor object into `floor` (it needs a
-//     Renderer or Collider so the spawner can read its size).
-//  4. Delete any collectibles you'd placed by hand in the scene - this replaces them.
+/*
+   Spawns collectibles in batches of `batchSize` 3
+   Picking randomly between spherePrefab and cubePrefab for each one, at random points on `floor'
+   Once every collectible in the current batch has actually been picked up (F), the next batch spawns.
+*/
 public class CollectibleSpawner : MonoBehaviour
 {
     public GameObject spherePrefab;
@@ -80,21 +72,16 @@ public class CollectibleSpawner : MonoBehaviour
 
         SnapToFloor(instance);
 
-        // GUID-based so IDs never collide, even across separate Play sessions that share the
-        // same save file on disk.
+        // GUID-based so IDs never collide, even across separate Play sessions that share the same save file on disk
         item.itemID = "Collectible_" + System.Guid.NewGuid().ToString("N").Substring(0, 8);
         item.Collected += HandleItemCollected;
         activeBatch.Add(item);
     }
 
-    // Measures the actual spawned instance (whatever size/shape it turned out to be) and
-    // repositions it so its visual bottom sits right on the floor surface - fixes the "floats
-    // way more than it should" bug you'd get from assuming a single fixed height offset works
-    // for every prefab regardless of its real size.
     void SnapToFloor(GameObject instance)
     {
         Renderer rend = instance.GetComponentInChildren<Renderer>();
-        if (rend == null) return; // nothing to measure - leave it where RandomPointOnFloor put it
+        if (rend == null) return;
 
         float bottomToPivot = instance.transform.position.y - rend.bounds.min.y;
         Vector3 pos = instance.transform.position;
@@ -105,7 +92,7 @@ public class CollectibleSpawner : MonoBehaviour
     Vector3 RandomPointOnFloor()
     {
         const int maxAttempts = 8;
-        const float probeHeight = 0.5f; // arbitrary - only used to test if this XZ spot has something solid in the way
+        const float probeHeight = 0.5f;
         Vector3 candidate = Vector3.zero;
 
         for (int attempt = 0; attempt < maxAttempts; attempt++)
@@ -118,7 +105,7 @@ public class CollectibleSpawner : MonoBehaviour
             if (!blocked) return candidate;
         }
 
-        return candidate; // give up and use the last attempt rather than spawning nothing
+        return candidate;
     }
 
     void HandleItemCollected(CollectibleItem item)
@@ -127,7 +114,7 @@ public class CollectibleSpawner : MonoBehaviour
 
         foreach (CollectibleItem member in activeBatch)
         {
-            if (!member.IsCollected) return; // batch isn't fully collected yet
+            if (!member.IsCollected) return;
         }
 
         SpawnBatch();

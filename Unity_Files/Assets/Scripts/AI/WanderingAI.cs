@@ -2,26 +2,11 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-// WanderingAI.cs
-// A simple moving AI target for the homing missile to lock onto and track - this is the
-// minimum needed to satisfy "dynamically tracks a moving AI" now that the full circuit-racing
-// test has been dropped from scope. No checkpoints/laps needed, just real NavMesh movement
-// (not a fixed back-and-forth patrol) so it reads as "AI" and not a scripted animation.
-//
-// SETUP:
-//  1. If NavMeshAgent/NavMesh baking isn't already in your project, install the "AI Navigation"
-//     package via Window > Package Manager (Unity 2022 LTS+ moved this out of the core engine).
-//  2. Bake a NavMesh for your level (NavMeshSurface component > Bake).
-//  3. Tag this GameObject with the same tag WeaponSwitcher.lockOnTag expects (default "AITarget") -
-//     add that tag first under Edit > Project Settings > Tags and Layers if it doesn't exist.
-//  4. Give it a Renderer (e.g. a Capsule primitive's MeshRenderer) so the idle-pause and hit-flash
-//     polish below actually show up - both are optional but cheap and read well on camera.
-//  5. IMPORTANT if you're wiring this up to weapons: the non-trigger Collider that receives hits
-//     (hitscan raycast / projectile OnCollisionEnter) and this script need to either be on the
-//     SAME GameObject, or the Collider can be on a child - ProjectileBase/WeaponSwitcher use
-//     GetComponentInParent<IDamageable>() so either layout works. Also make sure "Is Trigger" is
-//     UNCHECKED on that collider - a trigger collider won't receive OnCollisionEnter, and the
-//     hitscan raycast ignores triggers by default too, so nothing would ever register as a hit.
+/*
+   A simple moving AI target for the homing missile to lock onto and track
+   No checkpoints/laps needed, just real NavMesh movement - not a fixed back-and-forth patrol
+*/
+
 [RequireComponent(typeof(NavMeshAgent))]
 public class WanderingAI : MonoBehaviour, IDamageable
 {
@@ -45,13 +30,12 @@ public class WanderingAI : MonoBehaviour, IDamageable
     public Color hitFlashColor = Color.red;
     public float hitFlashDuration = 0.15f;
 
-    // Fired the moment health hits 0, just before Destroy(gameObject) - lets an AITargetSpawner
-    // (or anything else) react to this specific instance dying without polling every frame.
+    // Fired the moment health hits 0, just before Destroy(gameObject)
+	// Lets an AITargetSpawner react to this specific instance dying without polling every frame.
     public event System.Action<WanderingAI> Died;
 
-    // Static, fired alongside Died for every instance - lets GameplayHUD show a "Target
-    // Destroyed" message without having to subscribe to each WanderingAI individually (new
-    // ones keep spawning from AITargetSpawner over the course of a session).
+    // Static, fired alongside Died for every instance
+	// Lets GameplayHUD show a "Target Destroyed" message without having to subscribe to each WanderingAI individually
     public static event System.Action<WanderingAI> AnyTargetDestroyed;
 
     NavMeshAgent agent;
@@ -109,8 +93,6 @@ public class WanderingAI : MonoBehaviour, IDamageable
             }
         }
 
-        // Every attempt landed near a collectible (or the NavMesh sample failed) - move to the
-        // last valid point anyway rather than freezing; it'll just repick again once it arrives.
         if (foundAnyValidPoint)
         {
             agent.SetDestination(fallbackPoint);

@@ -1,12 +1,11 @@
 using UnityEngine;
 
-// AssessmentHUD.cs
-// REQUIRED regardless of which tests you chose:
-//   'P' toggles name + brand on screen
-//   'O' toggles the objectives list on screen
-// Uses OnGUI for speed (no Canvas/prefab setup needed) - perfectly fine for a dev-build
-// assessment submission. Attach to any always-active GameObject (e.g. the player or a
-// dedicated "GameManager" object).
+/*
+   Required Toggles:
+     'P' toggles name + brand on screen
+     'O' toggles the objectives list on screen
+   Uses OnGUI for speed meaning no Canvas/prefab setup is needed
+*/
 public class AssessmentHUD : MonoBehaviour
 {
     [TextArea] public string playerInfoText = "First Last - Programmer";
@@ -33,17 +32,12 @@ public class AssessmentHUD : MonoBehaviour
 
     void EnsureStyles()
     {
-        // Styles are built lazily because GUI.skin isn't valid until the first OnGUI call.
         if (titleStyle != null) return;
 
         titleStyle = BuildFixedColorStyle(22, Color.white);
         bodyStyle = BuildFixedColorStyle(16, Color.yellow);
     }
 
-    // Unity's default label style uses a DIFFERENT text color for hover/active/focused than
-    // for normal - so a plain GUI.Label can visibly change color just because the mouse
-    // happens to be over its screen region, even though it isn't interactive. Pinning every
-    // state to the same color stops that.
     GUIStyle BuildFixedColorStyle(int fontSize, Color color)
     {
         GUIStyle style = new GUIStyle(GUI.skin.label) { fontSize = fontSize, wordWrap = true };
@@ -65,8 +59,6 @@ public class AssessmentHUD : MonoBehaviour
 
         if (showPlayerInfo)
         {
-            // CalcHeight measures how tall the wrapped text actually needs at this width,
-            // instead of guessing a fixed Rect height that clips longer text.
             float h = titleStyle.CalcHeight(new GUIContent(playerInfoText), LabelWidth);
             GUI.Label(new Rect(LabelX, y, LabelWidth, h), playerInfoText, titleStyle);
             y += h + 8f;

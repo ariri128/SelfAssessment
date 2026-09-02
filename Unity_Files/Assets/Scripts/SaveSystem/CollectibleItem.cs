@@ -1,12 +1,9 @@
 using UnityEngine;
 
-// CollectibleItem.cs
-// A world pickup with a stable, unique ID (either set by hand in the inspector for a
-// placed item, or assigned at runtime by CollectibleSpawner for a spawned one). The save
-// system records which IDs have been collected so a reload can hide the right ones.
-// SETUP: give this GameObject/prefab a Collider with "Is Trigger" checked.
-// Standing in the trigger arms it - the player must then press F to actually pick it up
-// (not automatic on touch).
+/*
+   A world pickup with a stable, unique ID assigned at runtime by CollectibleSpawner for spawned items
+   The save system records which IDs have been collected so a reload can hide the right ones
+*/
 public class CollectibleItem : MonoBehaviour
 {
     [Tooltip("MUST be unique per instance, e.g. \"Coin_01\". Leave blank on a prefab meant to be spawned by CollectibleSpawner - it assigns one at spawn time.")]
@@ -14,14 +11,9 @@ public class CollectibleItem : MonoBehaviour
 
     public bool IsCollected { get; private set; }
 
-    // Fired once, the moment the player actually picks this up via F (never fires from a
-    // silent state restore during Load - see SetCollectedSilently).
     public event System.Action<CollectibleItem> Collected;
 
-    // Static, fired by EVERY instance - lets GameplayHUD show "Press [F] to collect" without
-    // having to individually subscribe to (or poll) every collectible in the scene. Armed =
-    // player is standing in this item's trigger and it hasn't been picked up yet; Disarmed =
-    // player left range, or the item just got collected.
+    // Static, fired by every instance to let GameplayHUD show "Press [F] to collect" without having to individually subscribe to every collectible in the scene
     public static event System.Action<CollectibleItem> AnyArmed;
     public static event System.Action<CollectibleItem> AnyDisarmed;
 
@@ -67,9 +59,6 @@ public class CollectibleItem : MonoBehaviour
         }
     }
 
-    // Safety net: if this item gets disabled/destroyed some other way while still armed (e.g.
-    // a fresh batch spawns and the old one goes away), make sure the HUD prompt doesn't get
-    // stuck on screen.
     void OnDisable()
     {
         if (playerInRange)
@@ -99,8 +88,6 @@ public class CollectibleItem : MonoBehaviour
         Collected?.Invoke(this);
     }
 
-    // Called on pickup, and by the save system on load to instantly reflect a
-    // previously-collected state without re-triggering pickup FX/sound or the Collected event.
     public void SetCollectedSilently(bool collected)
     {
         IsCollected = collected;
