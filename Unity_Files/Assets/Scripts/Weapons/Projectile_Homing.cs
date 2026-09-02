@@ -31,7 +31,14 @@ public class Projectile_Homing : ProjectileBase
             transform.forward, desiredForward,
             turnRateDegPerSec * Mathf.Deg2Rad * Time.fixedDeltaTime, 0f);
 
-        transform.rotation = Quaternion.LookRotation(newForward);
-        rb.linearVelocity = transform.forward * speed; // Unity 2022 LTS or earlier: use rb.velocity
+        // MoveRotation (not transform.rotation =) since rb is a non-kinematic Rigidbody -
+        // writing transform directly fights the physics engine's own interpolation/collision
+        // solve and can jitter, especially with Continuous Dynamic collision detection.
+        // MoveRotation doesn't apply until the physics step runs, so build velocity from
+        // newRotation directly rather than reading transform.forward right after - that would
+        // still be last frame's facing.
+        Quaternion newRotation = Quaternion.LookRotation(newForward);
+        rb.MoveRotation(newRotation);
+        rb.linearVelocity = newRotation * Vector3.forward * speed; // Unity 2022 LTS or earlier: use rb.velocity
     }
 }
