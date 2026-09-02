@@ -1,15 +1,22 @@
 using UnityEngine;
 
 // CollectibleItem.cs
-// A world pickup with a stable, unique ID (set per-instance in the inspector). The save
+// A world pickup with a stable, unique ID (either set by hand in the inspector for a
+// placed item, or assigned at runtime by CollectibleSpawner for a spawned one). The save
 // system records which IDs have been collected so a reload can hide the right ones.
-// SETUP: give this GameObject a Collider with "Is Trigger" checked.
+// SETUP: give this GameObject/prefab a Collider with "Is Trigger" checked.
 // Standing in the trigger arms it - the player must then press F to actually pick it up
 // (not automatic on touch).
 public class CollectibleItem : MonoBehaviour
 {
-    [Tooltip("MUST be unique per placed instance, e.g. \"Coin_01\", \"Coin_02\".")]
+    [Tooltip("MUST be unique per instance, e.g. \"Coin_01\". Leave blank on a prefab meant to be spawned by CollectibleSpawner - it assigns one at spawn time.")]
     public string itemID;
+
+    public bool IsCollected { get; private set; }
+
+    // Fired once, the moment the player actually picks this up via F (never fires from a
+    // silent state restore during Load - see SetCollectedSilently).
+    public event System.Action<CollectibleItem> Collected;
 
     Renderer[] renderers;
     Collider col;
@@ -21,16 +28,11 @@ public class CollectibleItem : MonoBehaviour
     {
         renderers = GetComponentsInChildren<Renderer>();
         col = GetComponent<Collider>();
-
-        if (string.IsNullOrEmpty(itemID))
-        {
-            Debug.LogWarning($"CollectibleItem on {name} has no itemID set - give it a unique name!");
-        }
     }
 
     void Update()
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.F))
+        if (playerInRange && !IsCollected && Input.GetKeyDown(KeyCode.F))
         {
             Collect();
         }
@@ -58,19 +60,28 @@ public class CollectibleItem : MonoBehaviour
 
     void Collect()
     {
+        if (string.IsNullOrEmpty(itemID))
+        {
+            Debug.LogWarning($"CollectibleItem on {name} has no itemID set - give it a unique one!");
+        }
+
         if (pendingSaveComp != null)
         {
             pendingSaveComp.RegisterCollected(itemID);
         }
+
         SetCollectedSilently(true);
         playerInRange = false;
         pendingSaveComp = null;
+
+        Collected?.Invoke(this);
     }
 
     // Called on pickup, and by the save system on load to instantly reflect a
-    // previously-collected state without re-triggering pickup FX/sound.
+    // previously-collected state without re-triggering pickup FX/sound or the Collected event.
     public void SetCollectedSilently(bool collected)
     {
+        IsCollected = collected;
         foreach (Renderer r in renderers) r.enabled = !collected;
         if (col) col.enabled = !collected;
     }
